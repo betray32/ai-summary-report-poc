@@ -1,31 +1,40 @@
 package com.cek32.ai.SummaryAI.api;
 
 import com.cek32.ai.SummaryAI.model.RequestSummaryAnalysis;
+import com.cek32.ai.SummaryAI.model.ResponseSummaryAnalysis;
+import com.cek32.ai.SummaryAI.service.GenerateSummaryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-
-import java.util.Map;
+import java.time.Instant;
+import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class ApiExposer {
 
-    @PostMapping(value = "/checkAnGenerateAnalysis", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, String>> checkAnGenerateAnalysis(@RequestBody RequestSummaryAnalysis request) {
+    private final GenerateSummaryService generateSummaryService;
+
+    @PostMapping(value = "/checkAndGenerateAnalysis", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ResponseSummaryAnalysis> checkAndGenerateAnalysis(@RequestBody(required = false) RequestSummaryAnalysis request) {
+
         if (request == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("status", "error", "message", "Request body is required"));
+            ResponseSummaryAnalysis error = new ResponseSummaryAnalysis();
+            error.setFlightKey("INVALID-REQUEST");
+            error.setGeneratedAt(Instant.now().toString());
+            error.setSummary(new ResponseSummaryAnalysis.Summary(
+                    "Request body is required",
+                    ResponseSummaryAnalysis.Priority.CRITICAL
+            ));
+            error.setSignals(new ResponseSummaryAnalysis.Signals(0, 0, List.of()));
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
 
-        // TODO: replace placeholder logic with real validation/analysis generation
-        return ResponseEntity.ok(Map.of(
-                "status", "ok",
-                "message", "Analysis received and generated (placeholder)"
-        ));
+        ResponseSummaryAnalysis result = generateSummaryService.analyze(request);
+        return ResponseEntity.ok(result);
     }
 }
