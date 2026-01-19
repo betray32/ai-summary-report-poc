@@ -268,4 +268,4 @@ This project is a **technical and architectural proof of concept**. AI-generated
 
 ## 👤 Author
 
-**Milo**
+**Camilo E. Contreras (Betray32 - Cek32)**
