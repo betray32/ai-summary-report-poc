@@ -38,10 +38,8 @@ public class OpenAiClient {
      */
     public String generateSummary(RequestSummaryAnalysis request) throws Exception {
 
-        // 1) Build prompt from full operational context
         String prompt = buildPrompt(request);
 
-        // 2) Build request body
         JsonObject body = new JsonObject();
         body.addProperty("model", MODEL);
 
@@ -68,7 +66,6 @@ public class OpenAiClient {
 
         String jsonBody = gson.toJson(body);
 
-        // 3) Build HTTP request
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(OPENAI_URL))
                 .timeout(Duration.ofSeconds(30))
@@ -77,7 +74,7 @@ public class OpenAiClient {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
                 .build();
 
-        // 4) Call OpenAI
+        // CALL OPENAI API
         HttpResponse<String> response = httpClient.send(
                 httpRequest,
                 HttpResponse.BodyHandlers.ofString()
@@ -96,7 +93,6 @@ public class OpenAiClient {
     // ------------------------
     // Prompt Builder
     // ------------------------
-
     private String buildPrompt(RequestSummaryAnalysis r) {
         StringBuilder sb = new StringBuilder(512);
 
